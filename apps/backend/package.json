@@ -1,0 +1,10 @@
+{
+  "name": "@concept-lab/backend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "FastAPI backend for Concept Lab",
+  "scripts": {
+    "dev": "poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "start": "poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000"
+  }
+}

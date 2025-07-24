@@ -1,0 +1,19 @@
+{
+  "name": "concept-lab-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:frontend": "pnpm --filter @concept-lab/frontend dev",
+    "dev:backend": "pnpm --filter @concept-lab/backend dev",
+    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\"",
+    "build": "pnpm --filter @concept-lab/frontend build && pnpm --filter @concept-lab/backend build",
+    "start": "pnpm --filter @concept-lab/frontend start & pnpm --filter @concept-lab/backend start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

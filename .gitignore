@@ -1,0 +1,38 @@
+# Node/JS
+node_modules/
+dist/
+.next/
+*.log
+pnpm-lock.yaml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.env
+.venv/
+venv/
+poetry.lock
+
+# Build
+apps/frontend/.next/
+apps/frontend/out/
+apps/frontend/.turbo/
+
+# VSCode/IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# OS
+*.swp
+
+# Misc
+apps/backend/.mypy_cache/
+apps/backend/.pytest_cache/
+
+# Ignore local dev/test files
+*.local
