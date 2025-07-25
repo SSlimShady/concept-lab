@@ -1,7 +1,7 @@
 "use client";
 import "./globals.css";
 import type { ReactNode } from "react";
-import { createContext, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { daisyuiThemes } from "constants";
 
@@ -11,26 +11,31 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" data-theme={theme}>
       <body>
-        <main className="">
-          <h1 className="text-3xl font-bold mb-6 text-blue-700">
-            <Link href="/">Concept Lab</Link>
-          </h1>
-
-          <div className="mb-4">
-            <label className="mr-2 font-semibold">Theme:</label>
-            <select
-              className="select select-bordered select-sm"
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-            >
-              {daisyuiThemes?.map((t: string) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+        <main className="min-h-screen bg-base-200 px-4 py-8">
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-4xl font-extrabold text-primary drop-shadow">
+              <Link href="/">Concept Lab</Link>
+            </h1>
+            <div className="flex items-center">
+              <label className="mr-2 font-semibold text-base-content">
+                Theme:
+              </label>
+              <select
+                className="select select-bordered select-sm capitalize bg-base-100 text-base-content font-semibold"
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+              >
+                {daisyuiThemes?.map((t: string) => (
+                  <option key={t} value={t} className="capitalize">
+                    {t.replace(/-/g, " ")}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          {children}
+          <section className="max-w-3xl mx-auto bg-base-100 rounded-xl shadow-lg p-6">
+            {children}
+          </section>
         </main>
       </body>
     </html>
