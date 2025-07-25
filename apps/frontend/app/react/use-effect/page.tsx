@@ -8,11 +8,11 @@ function ChildExample({
 }) {
   useEffect(() => {
     handleEffect(
-      "--(Child) UseEffect with Empty Dependency Array. Child component mounted!"
+      "(Child) UseEffect with Empty Dependency Array. Child component mounted!"
     );
     return () => {
       handleEffect(
-        "--(Child) UseEffect with Empty Dependency Array. Child component unmounted!"
+        "(Child) UseEffect with Empty Dependency Array. Child component unmounted!"
       );
     };
   }, []);
@@ -33,19 +33,19 @@ export const useEffectGuide = () => {
   useEffect(() => {
     setLogs((prevLogs) => [
       ...prevLogs,
-      `--UseEffect with Count Dependency. Count: ${useStateCount}`,
+      `UseEffect with Count Dependency. Count: ${useStateCount}`,
     ]);
   }, [useStateCount]);
 
   useEffect(() => {
     setLogs((prevLogs) => [
       ...prevLogs,
-      "--UseEffect with Empty Dependency Array. Component mounted!",
+      "UseEffect with Empty Dependency Array. Component mounted!",
     ]);
     return () => {
       setLogs((prevLogs) => [
         ...prevLogs,
-        "--UseEffect with Empty Dependency Array. Component unmounted!",
+        "UseEffect with Empty Dependency Array. Component unmounted!",
       ]);
     };
   }, []);
