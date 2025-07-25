@@ -1,20 +1,31 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div>
-      <h2>Welcome to Concept Lab</h2>
+      <h2>
+        {" "}
+        <Link href="/">Welcome to Concept Lab</Link>
+      </h2>
       <p>
         Explore React, Python, SQL, NoSQL, and FastAPI concepts from beginner to
         advanced.
       </p>
       <ul>
         <li>
-          <a href="/react/use-effect">React: useEffect</a>
+          <a href="/react">React</a>
         </li>
         <li>
-          <a href="/python/decorators">Python: Decorators</a>
+          <a href="/python">Python</a>
         </li>
         <li>
-          <a href="/sql/joins">SQL: Joins</a>
+          <a href="/sql">SQL</a>
+        </li>
+        <li>
+          <a href="/nosql">NoSQL</a>
+        </li>
+        <li>
+          <a href="/fastapi">FastAPI</a>
         </li>
       </ul>
     </div>

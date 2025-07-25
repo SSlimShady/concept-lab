@@ -1,25 +1,95 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 
-export default function UseEffectDemo() {
-  const [count, setCount] = useState(0);
-  const [serverTime, setServerTime] = useState<string | null>(null);
+function ChildExample({
+  handleEffect,
+}: {
+  handleEffect: (text: string) => void;
+}) {
+  useEffect(() => {
+    handleEffect(
+      "--UseEffect with Empty Dependency Array. Child component mounted!"
+    );
+    return () => {
+      handleEffect(
+        "--UseEffect with Empty Dependency Array. Child component unmounted!"
+      );
+    };
+  }, []);
+  return <h2>I am the Child component</h2>;
+}
+
+export const useEffectGuide = () => {
+  const [logs, setLogs] = useState<string[]>([]);
+  const [showChild, setShowChild] = useState(false);
+  const [useStateCount, setUseStateCount] = useState(0);
+  const renderCount = useRef(0);
+  renderCount.current += 1;
 
   useEffect(() => {
-    fetch("/api/react/use-effect")
-      .then((res) => res.json())
-      .then((data) => setServerTime(data.time));
-  }, [count]);
+    setLogs((prevLogs) => [
+      ...prevLogs,
+      `--UseEffect with Count Dependency. Count: ${useStateCount}`,
+    ]);
+  }, [useStateCount]);
+
+  useEffect(() => {
+    setLogs((prevLogs) => [
+      ...prevLogs,
+      "--UseEffect with Empty Dependency Array. Component mounted!",
+    ]);
+    return () => {
+      setLogs((prevLogs) => [
+        ...prevLogs,
+        "--UseEffect with Empty Dependency Array. Component unmounted!",
+      ]);
+    };
+  }, []);
+
+  const handleChildEffects = (text: string) => {
+    setLogs((prevLogs) => [...prevLogs, text]);
+  };
+
+  const clearLogs = () => {
+    setLogs([]);
+  };
 
   return (
     <div>
-      <h2>React: useEffect Example</h2>
-      <p>
-        Button click increments a counter and fetches server time from FastAPI
-        backend.
-      </p>
-      <button onClick={() => setCount((c) => c + 1)}>Increment: {count}</button>
-      <div>Server time: {serverTime ?? "Loading..."}</div>
+      <h2>{`Render Count: ${renderCount.current}`}</h2>
+      <button
+        className="btn btn-xs sm:btn-sm md:btn-md lg:btn-lg xl:btn-xl"
+        onClick={() => renderCount.current++}
+      >
+        Increment Render Count without actual render
+      </button>
+      <button
+        className="btn btn-xs sm:btn-sm md:btn-md lg:btn-lg xl:btn-xl"
+        onClick={() => setUseStateCount((prevCount) => prevCount + 1)}
+      >
+        Increment State Count
+      </button>
+      <button
+        className="btn btn-xs sm:btn-sm md:btn-md lg:btn-lg xl:btn-xl"
+        onClick={() => setShowChild((prevShow) => !prevShow)}
+      >
+        {showChild ? "Hide Child" : "Show Child"}
+      </button>
+      <button
+        className="btn btn-xs sm:btn-sm md:btn-md lg:btn-lg xl:btn-xl"
+        onClick={clearLogs}
+      >
+        Clear Logs
+      </button>
+      <h1>useEffect Types Logs</h1>
+      <ul>
+        {logs.map((log, index) => (
+          <li key={index}>{log}</li>
+        ))}
+      </ul>
+      {showChild && <ChildExample handleEffect={handleChildEffects} />}
     </div>
   );
-}
+};
+
+export default useEffectGuide;
