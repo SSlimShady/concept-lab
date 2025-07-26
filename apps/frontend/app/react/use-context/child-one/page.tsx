@@ -12,27 +12,37 @@ const ChildOne = forwardRef((props, ref) => {
   }));
 
   return (
-    <div>
-      <p>Child One Render Count: {childOneRenderCount.current}</p>
-      <p>Context Counter: {state.count}</p>
-      <button
-        className="btn btn-primary btn-sm"
-        onClick={() => dispatch({ type: "increment" })}
-      >
-        Increment Context Counter
-      </button>
-      <button
-        className="btn btn-secondary btn-sm"
-        onClick={() => dispatch({ type: "decrement" })}
-      >
-        Decrement Context Counter
-      </button>
-      <button
-        className="btn btn-neutral btn-sm"
-        onClick={() => dispatch({ type: "reset" })}
-      >
-        Reset Context Counter
-      </button>
+    <div className="card bg-base-100 shadow-inner w-full">
+      <div className="card-body items-center text-center p-4">
+        <div className="stats bg-transparent stats-vertical sm:stats-horizontal">
+          <div className="stat">
+            <div className="stat-title">Child Renders</div>
+            <div className="stat-value text-primary">
+              {childOneRenderCount.current}
+            </div>
+          </div>
+          <div className="stat">
+            <div className="stat-title">Context Value</div>
+            <div className="stat-value text-primary">{state.count}</div>
+          </div>
+        </div>
+        <div className="card-actions justify-center mt-2">
+          <button
+            className="btn btn-success btn-xs"
+            onClick={() => dispatch({ type: "increment" })}
+            aria-label="Increment from child"
+          >
+            Increment
+          </button>
+          <button
+            className="btn btn-error btn-xs"
+            onClick={() => dispatch({ type: "decrement" })}
+            aria-label="Decrement from child"
+          >
+            Decrement
+          </button>
+        </div>
+      </div>
     </div>
   );
 });
