@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 function ChildExample({
@@ -62,6 +62,26 @@ export const OptimizationGuide = () => {
   const handleClickMemo = useCallback(() => {
     setLogs((prev) => [...prev, `Child button clicked (memoized) `]);
   }, []);
+
+  const factorial = (n = 500) => {
+    let result = 1;
+    for (let i = 1; i <= n; i++) {
+      // simulate heavy work
+      for (let j = 0; j < 10000000; j++) {}
+      result *= i;
+    }
+    return result;
+  };
+
+  const memoFactorial = useMemo(() => factorial(), []);
+
+  const logSlowFactorial = () => {
+    setLogs((prev) => [...prev, `Factorial result: ${factorial()}`]);
+  };
+
+  const logFastFactorial = () => {
+    setLogs((prev) => [...prev, `Memoized Factorial result: ${memoFactorial}`]);
+  };
   return (
     <div>
       <button
@@ -71,10 +91,23 @@ export const OptimizationGuide = () => {
         Trigger Parent re-render
       </button>
       <button
-        className="btn btn-secondary btn-sm"
+        className="btn btn-primary btn-sm"
         onClick={() => setPropValue((s) => !s)}
       >
         Toggle Prop Value
+      </button>
+      <button
+        className="btn btn-accent btn-sm"
+        onClick={() => logSlowFactorial()}
+      >
+        Log Factorial (without memo)
+      </button>
+
+      <button
+        className="btn btn-info btn-sm"
+        onClick={() => logFastFactorial()}
+      >
+        Log Factorial (with memo)
       </button>
       <ChildExample boolValue={propValue} handleClick={handleClick} />
       <ChildMemoExample

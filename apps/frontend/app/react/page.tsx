@@ -12,16 +12,6 @@ const guides = [
     label: "Optimization Guide",
     color: "btn-accent",
   },
-  {
-    href: "/react/use-callback",
-    label: "useCallback Guide",
-    color: "btn-info",
-  },
-  {
-    href: "/react/use-reducer",
-    label: "useReducer Guide",
-    color: "btn-warning",
-  },
 ];
 
 const ReactGuide = () => {
