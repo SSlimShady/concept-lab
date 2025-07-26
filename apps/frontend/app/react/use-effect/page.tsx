@@ -23,7 +23,7 @@ function ChildExample({
   );
 }
 
-export const useEffectGuide = () => {
+export const UseEffectGuide = () => {
   const [logs, setLogs] = useState<string[]>([]);
   const [showChild, setShowChild] = useState(false);
   const [useStateCount, setUseStateCount] = useState(0);
@@ -149,4 +149,4 @@ export const useEffectGuide = () => {
   );
 };
 
-export default useEffectGuide;
+export default UseEffectGuide;

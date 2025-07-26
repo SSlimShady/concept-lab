@@ -11,7 +11,7 @@ export const CounterContext = createContext({
   reset: () => {},
 });
 
-export const useContextGuide = () => {
+export const UseContextGuide = () => {
   const [count, setCount] = useState(0);
   const [showChildOne, setShowChildOne] = useState(false);
   const [showChildTwo, setShowChildTwo] = useState(false);
@@ -58,16 +58,16 @@ export const useContextGuide = () => {
         className="btn btn-primary btn-sm"
         onClick={() => setCount((c) => c + 1)}
       >
-        Increment Counter
+        Increment Context Counter
       </button>
       <button
         className="btn btn-secondary btn-sm"
         onClick={() => setCount((c) => c - 1)}
       >
-        Decrement Counter
+        Decrement Context Counter
       </button>
       <button className="btn btn-neutral btn-sm" onClick={() => setCount(0)}>
-        Reset Counter
+        Reset Context Counter
       </button>
       {showChildOne && <ChildOne ref={childOneRef} />}
       {showChildTwo && <ChildTwo ref={childTwoRef} />}
@@ -75,4 +75,4 @@ export const useContextGuide = () => {
   );
 };
 
-export default useContextGuide;
+export default UseContextGuide;

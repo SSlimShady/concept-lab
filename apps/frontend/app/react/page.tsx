@@ -7,7 +7,11 @@ const guides = [
     label: "useContext Guide",
     color: "btn-secondary",
   },
-  { href: "/react/use-memo", label: "useMemo Guide", color: "btn-accent" },
+  {
+    href: "/react/optimizations",
+    label: "Optimization Guide",
+    color: "btn-accent",
+  },
   {
     href: "/react/use-callback",
     label: "useCallback Guide",

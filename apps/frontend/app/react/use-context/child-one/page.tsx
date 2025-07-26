@@ -18,16 +18,16 @@ const ChildOne = forwardRef((props, ref) => {
         className="btn btn-primary btn-sm"
         onClick={counterContext.increment}
       >
-        Increment Counter
+        Increment Context Counter
       </button>
       <button
         className="btn btn-secondary btn-sm"
         onClick={counterContext.decrement}
       >
-        Decrement Counter
+        Decrement Context Counter
       </button>
       <button className="btn btn-neutral btn-sm" onClick={counterContext.reset}>
-        Reset Counter
+        Reset Context Counter
       </button>
     </div>
   );
