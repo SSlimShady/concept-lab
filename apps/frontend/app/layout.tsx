@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </select>
             </div>
           </div>
-          <section className="max-w-3xl mx-auto bg-base-100 rounded-xl shadow-lg p-6">
+          <section className="max-w-8xl mx-auto bg-base-100 rounded-xl shadow-lg p-6">
             {children}
           </section>
         </main>
