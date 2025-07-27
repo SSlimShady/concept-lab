@@ -34,6 +34,7 @@ export const UseEffectGuide = () => {
   const [noDepToggle, setNoDepToggle] = useState(false);
   const renderCount = useRef(0);
   const logIdCounter = useRef(0);
+  const logContainerRef = useRef<HTMLDivElement>(null);
   renderCount.current += 1;
 
   const addLog = useCallback((text: string, type: LogType) => {
@@ -84,6 +85,12 @@ export const UseEffectGuide = () => {
     },
     [addLog]
   );
+
+  useEffect(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, [logs]);
 
   const clearLogs = () => {
     setLogs([]);
@@ -233,9 +240,7 @@ export const UseEffectGuide = () => {
 
               <div
                 className="bg-neutral text-neutral-content rounded-lg p-4 mt-4 h-96 overflow-y-auto font-mono text-sm"
-                ref={(el) => {
-                  if (el) el.scrollTop = el.scrollHeight;
-                }}
+                ref={logContainerRef}
               >
                 {logs.length === 0 ? (
                   <div className="opacity-50">Logs will appear here...</div>
