@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware import Middleware
-from app.routers import react, python, sql
+from app.routers import react, python, sql, context, rag_elasticsearch
 
 app = FastAPI(
     title="Concept Lab API",
@@ -23,3 +23,9 @@ app.add_middleware(
 app.include_router(react.router, prefix="/api/react", tags=["react"])
 app.include_router(python.router, prefix="/api/python", tags=["python"])
 app.include_router(sql.router, prefix="/api/sql", tags=["sql"])
+app.include_router(context.router, prefix="/api/context", tags=["context"])
+app.include_router(
+    rag_elasticsearch.router,
+    prefix="/api/rag_elasticsearch",
+    tags=["rag_elasticsearch"],
+)
