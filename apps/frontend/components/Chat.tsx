@@ -1,12 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-// Placeholder for lucide-react icons
-const Bot = () => "🤖";
-const User = () => "👤";
-const Send = () => "➤";
-const Loader = () => "...";
+// Minimal inline icons (no extra deps)
+const Send = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className="h-5 w-5"
+  >
+    <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z" />
+  </svg>
+);
+
+const TypingDots = () => (
+  <div className="flex items-center gap-1 px-3 py-2">
+    <span className="h-2 w-2 animate-bounce rounded-full bg-base-content [animation-delay:-0.3s]"></span>
+    <span className="h-2 w-2 animate-bounce rounded-full bg-base-content [animation-delay:-0.15s]"></span>
+    <span className="h-2 w-2 animate-bounce rounded-full bg-base-content"></span>
+  </div>
+);
+
+const Spinner = () => (
+  <span className="loading loading-spinner loading-xs" aria-label="loading" />
+);
 
 export default function Chat() {
   const [message, setMessage] = useState("");
@@ -16,15 +34,28 @@ export default function Chat() {
   const [ragMode, setRagMode] = useState(false);
   const [context, setContext] = useState("");
   const [indexName, setIndexName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [isSettingContext, setIsSettingContext] = useState(false);
+  const [isClearingContext, setIsClearingContext] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatHistory, isSending]);
+
+  const canSend =
+    !isSending &&
+    message.trim().length > 0 &&
+    (!ragMode || indexName.length > 0);
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
+    if (ragMode && !indexName) return;
 
     setChatHistory((prev) => [...prev, { role: "user", content: message }]);
     setMessage("");
-    setIsLoading(true);
+    setIsSending(true);
     setError(null);
 
     try {
@@ -70,13 +101,13 @@ export default function Chat() {
         err instanceof Error ? err.message : "An unknown error occurred."
       );
     } finally {
-      setIsLoading(false);
+      setIsSending(false);
     }
   };
 
   const handleSetContext = async () => {
     if (!context.trim()) return;
-    setIsLoading(true);
+    setIsSettingContext(true);
     setError(null);
 
     try {
@@ -108,12 +139,12 @@ export default function Chat() {
         err instanceof Error ? err.message : "An unknown error occurred."
       );
     } finally {
-      setIsLoading(false);
+      setIsSettingContext(false);
     }
   };
 
   const handleClearAllContexts = async () => {
-    setIsLoading(true);
+    setIsClearingContext(true);
     setError(null);
 
     try {
@@ -126,112 +157,184 @@ export default function Chat() {
       }
 
       setIndexName("");
-      setContext(""); // Clear context input as well
+      setContext("");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to clear all contexts."
       );
     } finally {
-      setIsLoading(false);
+      setIsClearingContext(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      <div className="flex-grow p-4 overflow-y-auto">
-        <div className="max-w-3xl mx-auto">
-          {chatHistory.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex items-start mb-4 ${
-                msg.role === "user" ? "justify-end" : ""
-              }`}
-            >
-              {msg.role === "ai" && (
-                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white mr-3">
-                  <Bot />
-                </div>
-              )}
-              <div
-                className={`p-3 rounded-lg ${
-                  msg.role === "user" ? "bg-blue-500 text-white" : "bg-white"
-                }`}
-              >
-                {msg.content}
-              </div>
-              {msg.role === "user" && (
-                <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center ml-3">
-                  <User />
-                </div>
-              )}
-            </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-center">
-              <Loader />
-            </div>
-          )}
-          {error && <div className="text-red-500 text-center">{error}</div>}
+    <div className="flex h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-2xl bg-base-100 shadow-xl">
+      {/* Header */}
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-base-200/60 bg-base-100/80 px-4 py-3 backdrop-blur">
+        <div className="flex items-center gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Concept Lab AI</h2>
+            <p className="text-xs opacity-60">
+              Conversational assistant with optional RAG
+            </p>
+          </div>
         </div>
       </div>
-      <div className="p-4 bg-white border-t">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center mb-2">
-            <input
-              type="checkbox"
-              checked={ragMode}
-              onChange={() => setRagMode(!ragMode)}
-              className="mr-2"
-            />
-            <label>RAG Mode</label>
-          </div>
-          {ragMode && (
-            <div className="flex flex-col mb-2">
-              <div className="flex">
-                <textarea
-                  value={context}
-                  onChange={(e) => setContext(e.target.value)}
-                  placeholder="Enter context text or URL"
-                  className="flex-grow p-2 border rounded-l-md"
-                  disabled={isLoading}
-                />
-                <button
-                  onClick={handleSetContext}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-r-md"
-                  disabled={isLoading}
-                >
-                  Set Context
-                </button>
-              </div>
-              {
-                <button
-                  onClick={handleClearAllContexts}
-                  className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md"
-                  disabled={isLoading}
-                >
-                  Clear Context
-                </button>
-              }
+
+      {/* Messages */}
+      <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
+        {chatHistory.map((msg, i) => (
+          <MessageBubble key={i} role={msg.role} content={msg.content} />
+        ))}
+        {isSending && (
+          <div className="flex items-start">
+            <div className="max-w-[80%] rounded-2xl border border-base-200 bg-base-200/60 p-2">
+              <TypingDots />
             </div>
-          )}
-          <div className="flex">
+          </div>
+        )}
+        {error && (
+          <div className="alert alert-error mt-2 w-fit">
+            <span className="text-sm">{error}</span>
+          </div>
+        )}
+        <div ref={endRef} />
+      </div>
+
+      {/* Bottom Controls: RAG + Input */}
+      <div className="border-t border-base-200/60 bg-base-100 px-4 py-3">
+        <div className="mx-auto flex max-w-4xl flex-col gap-3">
+          {/* RAG Controls inline near input */}
+          <div className="rounded-xl border border-base-300 bg-base-200/40 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <input
+                  id="rag-toggle"
+                  type="checkbox"
+                  checked={ragMode}
+                  onChange={() => setRagMode(!ragMode)}
+                  className="toggle toggle-sm"
+                />
+                <label htmlFor="rag-toggle" className="text-sm font-medium">
+                  RAG Mode
+                </label>
+              </div>
+              <div className="flex items-center gap-2 text-xs opacity-80">
+                {indexName ? (
+                  <span className="badge badge-outline badge-sm">
+                    Context set
+                  </span>
+                ) : ragMode ? (
+                  <span className="badge badge-warning badge-sm">
+                    No context
+                  </span>
+                ) : null}
+                {indexName && (
+                  <button
+                    onClick={handleClearAllContexts}
+                    className="btn btn-ghost btn-xs"
+                    disabled={isClearingContext}
+                  >
+                    {isClearingContext ? <Spinner /> : "Clear"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {ragMode && (
+              <div className="mt-2">
+                <label className="mb-1 block text-xs opacity-70">
+                  Context (text or URL)
+                </label>
+                <div className="flex gap-2">
+                  <textarea
+                    value={context}
+                    onChange={(e) => setContext(e.target.value)}
+                    placeholder="Paste background knowledge or a URL..."
+                    className="textarea textarea-bordered textarea-sm w-full"
+                    rows={2}
+                    disabled={isSettingContext}
+                  />
+                  <button
+                    onClick={handleSetContext}
+                    className="btn btn-primary"
+                    disabled={isSettingContext || !context.trim()}
+                  >
+                    {isSettingContext ? (
+                      <div className="flex items-center gap-2">
+                        <Spinner />
+                        <span>Set</span>
+                      </div>
+                    ) : (
+                      "Set Context"
+                    )}
+                  </button>
+                </div>
+                {ragMode && !indexName && (
+                  <p className="mt-1 text-xs text-warning">
+                    You must set context to enable chat in RAG mode.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Message input */}
+          <div className="flex items-end gap-2 rounded-2xl border border-base-200 bg-base-200/40 p-2">
             <input
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="flex-grow p-2 border rounded-l-md"
-              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-              disabled={isLoading}
+              className="input input-ghost flex-1 bg-transparent focus:outline-none"
+              placeholder={
+                ragMode && !indexName
+                  ? "Set context to enable chat..."
+                  : "Send a message..."
+              }
+              onKeyDown={(e) =>
+                e.key === "Enter" && canSend && handleSendMessage()
+              }
+              disabled={isSending || (ragMode && !indexName)}
             />
             <button
               onClick={handleSendMessage}
-              className="px-4 py-2 bg-blue-500 text-white rounded-r-md"
-              disabled={isLoading}
+              className="btn btn-primary btn-circle"
+              disabled={!canSend}
+              aria-label="Send"
             >
-              <Send />
+              {isSending ? <Spinner /> : <Send />}
             </button>
           </div>
+          <div className="mt-1 flex items-center justify-between text-xs opacity-60">
+            <span>Enter to send</span>
+            <span>Theme aware UI via DaisyUI tokens</span>
+          </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function MessageBubble({
+  role,
+  content,
+}: {
+  role: "user" | "ai";
+  content: string;
+}) {
+  if (role === "user") {
+    return (
+      <div className="flex items-start justify-end">
+        <div className="max-w-[80%] rounded-2xl bg-primary px-4 py-2 text-primary-content shadow-md">
+          <p className="whitespace-pre-wrap leading-relaxed">{content}</p>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-start">
+      <div className="max-w-[80%] rounded-2xl border border-base-300 bg-base-100 px-4 py-2 shadow-sm">
+        <p className="whitespace-pre-wrap leading-relaxed">{content}</p>
       </div>
     </div>
   );

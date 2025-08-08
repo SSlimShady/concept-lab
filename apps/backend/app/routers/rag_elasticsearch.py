@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch
 from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import ElasticsearchStore
 from langchain.prompts import PromptTemplate
-from langchain.schema.runnable import Runnable
+from langchain.schema.runnable import Runnable, RunnablePassthrough
 
 from app.core.config import get_es_client, get_llm, get_embedding_function
 
@@ -18,9 +18,36 @@ class ChatRequest(BaseModel):
     index_name: str | None = None
 
 
-async def send_message(runnable: Runnable, message: str):
-    async for chunk in runnable.astream(message):
-        yield chunk.content
+async def stream_tokens(runnable: Runnable, input_data):
+    async for chunk in runnable.astream(input_data):
+        # LangChain chat models often yield AIMessageChunk with .content
+        if hasattr(chunk, "content") and isinstance(getattr(chunk, "content"), str):
+            text = getattr(chunk, "content")
+            if text:
+                yield text
+            continue
+        # Some chains yield dicts with a 'result' at the end
+        if isinstance(chunk, dict):
+            if "result" in chunk and isinstance(chunk["result"], str):
+                yield chunk["result"]
+            elif "content" in chunk and isinstance(chunk["content"], str):
+                yield chunk["content"]
+            # Ignore other dict-shaped internal updates
+            continue
+        # Raw strings
+        if isinstance(chunk, str):
+            if chunk:
+                yield chunk
+            continue
+        # Ignore any other internal objects to prevent leaking repr text
+        continue
+
+
+def _format_docs(docs):
+    try:
+        return "\n\n".join([doc.page_content for doc in docs])
+    except Exception:
+        return ""
 
 
 @router.post("/chat")
@@ -43,7 +70,7 @@ async def chat(request: ChatRequest, es_client: Elasticsearch = Depends(get_es_c
         retriever = store.as_retriever()
 
         prompt_template = """
-        Use the following pieces of context to answer the question at the end.
+        Use the following pieces of context to answer the question at the end. But don't mention the context in your answer.
         If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
         {context}
@@ -55,19 +82,20 @@ async def chat(request: ChatRequest, es_client: Elasticsearch = Depends(get_es_c
             template=prompt_template, input_variables=["context", "question"]
         )
 
-        qa_chain = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=retriever,
-            return_source_documents=True,
-            chain_type_kwargs={"prompt": prompt},
+        # Build a streaming RAG pipeline so tokens come from LLM directly
+        rag_runnable: Runnable = (
+            {
+                "context": retriever | _format_docs,
+                "question": RunnablePassthrough(),
+            }
+            | prompt
+            | llm
         )
 
-        # For debugging: Print the final prompt that will be sent to the LLM
-        # Note: This involves an extra retrieval step for debugging purposes.
+        # Optional debug of final prompt (non-streaming)
         try:
             docs = retriever.get_relevant_documents(request.message)
-            context_str = "\n\n".join([doc.page_content for doc in docs])
+            context_str = _format_docs(docs)
             final_prompt_text = prompt.format(
                 context=context_str, question=request.message
             )
@@ -78,21 +106,10 @@ async def chat(request: ChatRequest, es_client: Elasticsearch = Depends(get_es_c
             print(f"Error generating debug prompt: {e}")
 
         return StreamingResponse(
-            send_message(qa_chain, {"query": request.message}),
+            stream_tokens(rag_runnable, request.message),
             media_type="text/event-stream",
         )
     else:
         return StreamingResponse(
-            send_message(llm, request.message), media_type="text/event-stream"
+            stream_tokens(llm, request.message), media_type="text/event-stream"
         )
-
-
-async def send_message(runnable: Runnable, input_data):
-    async for chunk in runnable.astream(input_data):
-        if isinstance(chunk, dict) and "result" in chunk:
-            yield chunk["result"]
-        elif isinstance(chunk, str):
-            yield chunk
-        else:
-            # Fallback for unexpected chunk types
-            yield str(chunk)
